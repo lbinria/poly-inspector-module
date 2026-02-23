@@ -31,7 +31,7 @@ Go to app directory and add the module to `modules` array in `settings.json`:
 {
 	"modules": [
 		...
-		"/path/to/salamesh_plugin_diag/build"
+		"/path/to/poly-inspector-module/build"
 	]
 }
 ```
