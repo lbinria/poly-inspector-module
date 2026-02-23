@@ -112,28 +112,6 @@ file(WRITE ${salamesh_build_dir}/settings.json "
 }
 ")
 
-add_custom_target(run_plugin_release
-  COMMAND ${CMAKE_COMMAND}
-    --build ${salamesh_build_dir}
-    --config Release
-    --target salamesh
-  COMMAND ${CMAKE_COMMAND} -E chdir ${salamesh_build_dir} ${salamesh_build_dir}/salamesh "-j {\"settings_path\": \"${CMAKE_CURRENT_BINARY_DIR}/settings.json\"}"
-  DEPENDS diagnostic_module salamesh
-  COMMENT "Building Debug and running Salamesh with the plugin"
-)
-
-add_custom_target(run_plugin_debug
-  COMMAND ${CMAKE_COMMAND}
-    --build ${salamesh_build_dir}
-    --config Debug
-    --target salamesh
-  COMMAND salamesh "-j {\"settings_path\": \"${CMAKE_CURRENT_BINARY_DIR}/settings.json\"}"  
-  DEPENDS diagnostic_module salamesh
-  WORKING_DIRECTORY ${salamesh_build_dir}
-
-  COMMENT "Building Debug and running Salamesh with the plugin"
-)
-
 if (MSVC)
   add_custom_target(copy-resources ALL
       COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/script.lua ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ 
