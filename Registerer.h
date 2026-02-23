@@ -17,7 +17,7 @@ struct Registerer final : public Script {
 
 		// Example, registering some functions to lua script
 		lua.set_function("get_radiuses", &getRadiuses);
-		lua.set_function("test", &test);
+		lua.set_function("compute_overlaps", &computeOverlaps);
 		lua.set_function("debug_lines", [](IApp &app, Model &model, std::vector<float> &radiuses) {
 			return debugLines(app, model, radiuses);
 		});

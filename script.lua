@@ -56,19 +56,35 @@ function layout_gui()
 	}
 end
 
-
+local real_time_compute = false
 function draw_diagnostic_gui()
-	if imgui.Button("Exit") then
-		-- Change nav path
-		app.navigation_path = {}
-	end
-
 	local model = app.model
+
+	imgui.Text("N verts: " .. tostring(model.nverts))
 
 	local sel_point_size, new_point_size = imgui.SliderFloat("Point size", model.points.size, 0, 50)
 	if (sel_point_size) then 
 		model.points.size = new_point_size
 	end
+
+	local sel_real_time_compute, new_real_time_compute = imgui.Checkbox("Real time compute", real_time_compute)
+	if (sel_real_time_compute) then 
+		real_time_compute = new_real_time_compute
+	end
+
+	if not real_time_compute then
+		if imgui.Button("Compute") then
+			compute()
+		end
+	end
+
+
+	if imgui.Button("Exit") then
+		-- Change nav path
+		app.navigation_path = {}
+	end
+
+
 end
 
 function draw_overlap_tooltip()
@@ -127,28 +143,33 @@ function draw_gui()
 
 end
 
+function compute()
+	-- Compute 3D radiuses of points from point size in pixels
+	local radiuses = get_radiuses(app, app.model)
+	
+	-- Display debug lines that shows computed radiuses of points
+	if app.is_debug then  
+		debug_lines(app, app.model, radiuses)
+	end 
+
+	points_overlaps = compute_overlaps(app.model, radiuses)
+end
+
 local interval = 0.
 function update(dt)
 	if app.navigation_path_string ~= diagnostic_overlap_view_path then 
 		return
 	end
 
-	-- Compute 3D radiuses of points from point size in pixels
-	local radiuses = get_radiuses(app, app.model)
-	
-	-- Display debug lines that shows computed radiuses of points
-	if app.is_debug then 
-		interval = interval + dt 
-		
-		if interval > 0.2 then 
-			debug_lines(app, app.model, radiuses)
-			interval = 0.
-		end
-	end 
+	interval = interval + dt
+	if interval < 0.1 then
+		return
+	end
 
-	points_overlaps = test(app.model, radiuses)
-
-
+	interval = 0
+	if real_time_compute then 
+		compute()
+	end
 
 end
 

@@ -165,33 +165,50 @@ void debugLines(IApp &app, Model &model, std::vector<float> &radiuses) {
 	lr.push();
 }
 
-std::vector<std::vector<long>> test(Model &model, std::vector<float> &radiuses) {
+std::vector<std::vector<long>> computeOverlaps(Model &model, std::vector<float> &radiuses) {
+
 
 	auto &triModel = model.as<TriModel>();
 	auto &m = triModel.getMesh();	
 
+
+	auto begin = std::chrono::system_clock::now();
+
 	// Init hbox
 	HBoxes3 hbox;
 
-	std::vector<BBox3> bboxes;
+
+	std::vector<BBox3> bboxes(m.nverts());
 	for (auto &v : m.iter_vertices()) {
+		const float r = radiuses[v];
+
 		BBox3 bb;
-		bb.add(v.pos() - vec3{radiuses[v], radiuses[v], radiuses[v]});
-		bb.add(v.pos() + vec3{radiuses[v], radiuses[v], radiuses[v]});
-		bboxes.push_back(bb);
+		bb.add(v.pos() - vec3{r, r, r});
+		bb.add(v.pos() + vec3{r, r, r});
+		bboxes[v] = bb;
 	}
 
+	auto end = std::chrono::system_clock::now();
+	std::cout << "Prepare HBox = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+
+	begin = std::chrono::system_clock::now();
+
+
 	hbox.init(bboxes);
+
+	end = std::chrono::system_clock::now();
+	std::cout << "Init HBox = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+
 
 	// Highlight degenerated points
 	PointAttribute<float> pointHl;
 	pointHl.bind("_highlight", triModel.getSurfaceAttributes(), triModel.getMesh());
 	pointHl.fill(0.f);
 
+	begin = std::chrono::system_clock::now();
+
 	std::vector<std::set<long>> pointOverlaps(m.nverts());
 	int nOverlaps = 0;
-
-
 
 	for (auto &a : m.iter_vertices()) {
 		
@@ -220,7 +237,27 @@ std::vector<std::vector<long>> test(Model &model, std::vector<float> &radiuses) 
 
 	}
 
+	// for (auto &a : m.iter_vertices()) {
+
+	// 	for (auto &b : m.iter_vertices()) {
+	// 		if ((a.pos() - b.pos()).norm2() <= (radiuses[a] + radiuses[b]) * .5 && a != b) {
+	// 			pointHl[a] = 1.f;
+	// 			pointHl[b] = 1.f;
+	// 			pointOverlaps[a].insert(b);
+	// 			pointOverlaps[b].insert(a);
+	// 		}
+	// 	}
+	// }
+
+	end = std::chrono::system_clock::now();
+	std::cout << "Intersect = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
+
+	begin = std::chrono::system_clock::now();
+
 	triModel.setHighlight(ElementKind::POINTS_ELT);
+
+	end = std::chrono::system_clock::now();
+	std::cout << "Set Highlight = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
 
 
 	std::vector<std::vector<long>> tablePointOverlaps;
@@ -232,6 +269,7 @@ std::vector<std::vector<long>> test(Model &model, std::vector<float> &radiuses) 
 		}
 		tablePointOverlaps.push_back(overlaps);
 	}
+
 
 	return tablePointOverlaps;
 }
