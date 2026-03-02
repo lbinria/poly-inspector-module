@@ -10,30 +10,46 @@ endif()
 
 set(SALAMESH_URI "https://github.com/lbinria/salamesh.git")
 
-# # Include local overrides if the file exists
-# if(EXISTS "${CMAKE_SOURCE_DIR}/CMakeLists.local.txt")
+# Include local overrides if the file exists
+if(EXISTS "${CMAKE_SOURCE_DIR}/CMakeLists.local.txt")
 
-# 	message(STATUS "Including local configuration")
-# 	include("${CMAKE_SOURCE_DIR}/CMakeLists.local.txt")
+	message(STATUS "Including local configuration")
+	include("${CMAKE_SOURCE_DIR}/CMakeLists.local.txt")
 
-# 	# add_subdirectory(${SALAMESH_URI} salamesh)
-#   # set(SALAMESH_SRC "salamesh")
+	# add_subdirectory(${SALAMESH_URI} salamesh)
+  # set(SALAMESH_SRC "salamesh")
 
-# else()
+  include(FetchContent)
+  FetchContent_Declare(
+    salamesh
+    GIT_REPOSITORY "${SALAMESH_URI}"
+    GIT_TAG        master
+    GIT_SUBMODULES_RECURSE ON
+  )
+  FetchContent_MakeAvailable(salamesh)
+  set(SALAMESH_SRC "_deps/salamesh-src")
 
-# endif()
 
-include(FetchContent)
-FetchContent_Declare(
-salamesh
-GIT_REPOSITORY "${SALAMESH_URI}"
-GIT_TAG        45185f62bb8a62116fbb90dc5e589fe57ebfda69
-GIT_SUBMODULES_RECURSE ON
-)
-FetchContent_MakeAvailable(salamesh)
+else()
 
-set(SALAMESH_SRC "_deps/salamesh-src")
+  include(FetchContent)
+  FetchContent_Declare(
+    salamesh
+    GIT_REPOSITORY "${SALAMESH_URI}"
+    GIT_TAG        master
+    GIT_SUBMODULES_RECURSE ON
+  )
+  FetchContent_MakeAvailable(salamesh)
+  
+  set(SALAMESH_SRC "_deps/salamesh-src")
 
+endif()
+
+
+
+
+message(STATUS "Salamesh src directory: ${SALAMESH_SRC}")
+message(STATUS "Salamesh src directory: ${salamesh_SOURCE_DIR}")
 
 # Add salamesh directory as include
 include_directories(${salamesh_SOURCE_DIR}/core)

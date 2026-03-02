@@ -4,14 +4,14 @@ local view_debug_line = true
 function init()
 	-- If debug, just load toy model
 	if app.is_debug then 
-		-- app:load_model("assets/catorus_tri.geogram", "bob")
-		app:load_model("assets/catorus_quad.geogram", "cat")
+		app:load_model("assets/catorus_tri.geogram", "cat")
+		-- app:load_model("assets/catorus_quad.geogram", "cat")
 		-- app:load_model("assets/simple_poly.geogram", "poly")
 	end
 end
 
 function setup_gfx() 
-	if (not app.has_models) or app.navigation_path_string ~= diagnostic_overlap_view_path then
+	if (not app.has_models) or app.navigation_path:str() ~= diagnostic_overlap_view_path then
 		return
 	end
 
@@ -19,13 +19,11 @@ function setup_gfx()
 	model.points.visible = true
 end
 
-function unset_gfx() 
-	if (not app.has_models) or app.navigation_path_string == diagnostic_overlap_view_path then
+function unset_gfx(model)
+	if not model then
 		return
 	end
 	
-	-- Get current model
-	local model = app.model
 	model.points.visible = false
 	model:unset_highlight(ElementKind.POINTS_ELT)
 	
@@ -37,17 +35,21 @@ end
 
 function navigation_path_changed(old_nav_path, new_nav_path)
 	-- Setup gfx
-	if not (old_nav_path[1] == "diagnostic" and old_nav_path[2] == "overlap-view") and new_nav_path[1] == "diagnostic" and new_nav_path[2] ==  "overlap-view" then
+	if not (old_nav_path:str() == "diagnostic/overlap-view") and new_nav_path:str() == "diagnostic/overlap-view" then
 		setup_gfx()
 	end
 	-- Unsetup gfx 
-	if not (new_nav_path[1] == "diagnostic" and new_nav_path[2] == "overlap-view") and old_nav_path[1] == "diagnostic" and old_nav_path[2] ==  "overlap-view" then
-		unset_gfx()
+	if not (new_nav_path:str() == "diagnostic/overlap-view") and old_nav_path:str() == "diagnostic/overlap-view" then
+		unset_gfx(app.model)
 	end
 end
 
 function selected_model_changed(old_name, new_name)
-
+	if old_name == new_name then 
+		return 
+	end
+	unset_gfx(app:get_model(old_name))
+	app.navigation_path = ""
 end
 
 function layout_gui() 
@@ -60,6 +62,7 @@ local real_time_compute = false
 function draw_diagnostic_gui()
 	local model = app.model
 
+	imgui.Text("Selected model: " .. app.selected_model)
 	imgui.Text("N verts: " .. tostring(model.nverts))
 
 	local sel_point_size, new_point_size = imgui.SliderFloat("Point size", model.points.size, 0, 50)
@@ -67,10 +70,10 @@ function draw_diagnostic_gui()
 		model.points.size = new_point_size
 	end
 
-	local sel_real_time_compute, new_real_time_compute = imgui.Checkbox("Real time compute", real_time_compute)
-	if (sel_real_time_compute) then 
-		real_time_compute = new_real_time_compute
-	end
+	-- local sel_real_time_compute, new_real_time_compute = imgui.Checkbox("Real time compute", real_time_compute)
+	-- if (sel_real_time_compute) then 
+	-- 	real_time_compute = new_real_time_compute
+	-- end
 
 	if not real_time_compute then
 		if imgui.Button("Compute") then
@@ -81,7 +84,8 @@ function draw_diagnostic_gui()
 
 	if imgui.Button("Exit") then
 		-- Change nav path
-		app.navigation_path = {}
+		unset_gfx(app.model)
+		app.navigation_path = ""
 	end
 
 
@@ -117,21 +121,30 @@ function draw_gui()
 
 	imgui.Begin("Toolbar##tool_bar_diagnostic")
 
-	if app.navigation_path_string == diagnostic_overlap_view_path then 
+	if app.navigation_path:str() == diagnostic_overlap_view_path then 
 		imgui.BeginDisabled()
 	end
 
 	local has_changed = false
 	if imgui.Button("View overlap") then 
-		app.navigation_path = {"diagnostic", "overlap-view"}
+		-- app.navigation_path = {"diagnostic", "overlap-view"}
+		app.navigation_path = "diagnostic/overlap-view"
+		print("hello: " .. tostring(app.navigation_path))
+		
+		if app.navigation_path == "diagnostic/overlap-view" then 
+			print("ok")
+		else 
+			print("nok")
+		end
+
 		has_changed = true
 	end
 
-	if not has_changed and app.navigation_path_string == diagnostic_overlap_view_path then 
+	if not has_changed and app.navigation_path:str() == diagnostic_overlap_view_path then 
 		imgui.EndDisabled()
 	end
 
-	if app.navigation_path_string == diagnostic_overlap_view_path then
+	if app.navigation_path:str() == diagnostic_overlap_view_path then
 		draw_diagnostic_gui()
 	end
 
@@ -157,7 +170,7 @@ end
 
 local interval = 0.
 function update(dt)
-	if app.navigation_path_string ~= diagnostic_overlap_view_path then 
+	if app.navigation_path:str() ~= diagnostic_overlap_view_path then 
 		return
 	end
 
@@ -171,6 +184,18 @@ function update(dt)
 		compute()
 	end
 
+end
+
+function mouse_button(button, action, mods)
+
+	if app.input_state.mouse.dbl_buttons[1] then
+		local mesh_input_state = app.input_state.mesh
+		if mesh_input_state.any_hovered then 
+			local hovered_name = app:get_model_name_by_index(mesh_input_state.hovered)
+			app:focus(hovered_name)
+		end
+	
+	end
 end
 
 -- function draw_debug_lines(radiuses)
