@@ -17,6 +17,7 @@ function setup_gfx()
 
 	local model = app.model
 	model.points.visible = true
+	model.mesh.size = 1
 end
 
 function unset_gfx(model)
@@ -25,6 +26,7 @@ function unset_gfx(model)
 	end
 	
 	model.points.visible = false
+	model.mesh.size = 0
 	model:unset_highlight(ElementKind.POINTS_ELT)
 	
 	-- Remove debug gizmos
@@ -127,16 +129,7 @@ function draw_gui()
 
 	local has_changed = false
 	if imgui.Button("View overlap") then 
-		-- app.navigation_path = {"diagnostic", "overlap-view"}
 		app.navigation_path = "diagnostic/overlap-view"
-		print("hello: " .. tostring(app.navigation_path))
-		
-		if app.navigation_path == "diagnostic/overlap-view" then 
-			print("ok")
-		else 
-			print("nok")
-		end
-
 		has_changed = true
 	end
 
