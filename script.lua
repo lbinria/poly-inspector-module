@@ -8,6 +8,9 @@ function init()
 		-- app:load_model("assets/catorus_quad.geogram", "cat")
 		-- app:load_model("assets/simple_poly.geogram", "poly")
 	end
+
+	print("Script imgui context ID: " .. tostring(imgui.CtxId()))
+	
 end
 
 function setup_gfx() 
@@ -122,6 +125,7 @@ function draw_gui()
 	end
 
 	imgui.Begin("Toolbar##tool_bar_diagnostic")
+	model.point.visible = 32
 
 	if app.navigation_path:str() == diagnostic_overlap_view_path then 
 		imgui.BeginDisabled()

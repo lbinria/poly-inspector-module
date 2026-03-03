@@ -13,25 +13,18 @@ set(SALAMESH_URI "https://github.com/lbinria/salamesh.git")
 # Include local overrides if the file exists
 if(EXISTS "${CMAKE_SOURCE_DIR}/CMakeLists.local.txt")
 
+  # Local include
 	message(STATUS "Including local configuration")
 	include("${CMAKE_SOURCE_DIR}/CMakeLists.local.txt")
 
-	# add_subdirectory(${SALAMESH_URI} salamesh)
-  # set(SALAMESH_SRC "salamesh")
-
-  include(FetchContent)
-  FetchContent_Declare(
-    salamesh
-    GIT_REPOSITORY "${SALAMESH_URI}"
-    GIT_TAG        master
-    GIT_SUBMODULES_RECURSE ON
-  )
-  FetchContent_MakeAvailable(salamesh)
-  set(SALAMESH_SRC "_deps/salamesh-src")
-
+  # Add salamesh as subdir
+	add_subdirectory(${SALAMESH_URI} salamesh)
+  # Source dir is the directory we point on local
+  set(salamesh_SOURCE_DIR ${SALAMESH_URI})
 
 else()
 
+  # Fetch for git
   include(FetchContent)
   FetchContent_Declare(
     salamesh
@@ -40,15 +33,11 @@ else()
     GIT_SUBMODULES_RECURSE ON
   )
   FetchContent_MakeAvailable(salamesh)
-  
-  set(SALAMESH_SRC "_deps/salamesh-src")
 
 endif()
 
 
 
-
-message(STATUS "Salamesh src directory: ${SALAMESH_SRC}")
 message(STATUS "Salamesh src directory: ${salamesh_SOURCE_DIR}")
 
 # Add salamesh directory as include
@@ -87,19 +76,19 @@ include_directories(diagnostic_module
 )
 
 
-set(LUA_DIR "${CMAKE_BINARY_DIR}/${SALAMESH_SRC}/libs/lua-5.4.2_Win64_dll17_lib")
+set(LUA_DIR "${salamesh_SOURCE_DIR}/libs/lua-5.4.2_Win64_dll17_lib")
 set(LUA_INCLUDE_DIR "${LUA_DIR}/include")
 
 include_directories(${LUA_INCLUDE_DIR})
 include_directories(diagnostic_module 
   PRIVATE 
-  "${CMAKE_BINARY_DIR}/${SALAMESH_SRC}/include"
+  "${salamesh_SOURCE_DIR}/include"
 )
 
 set(SOL_SOURCES
-    ${CMAKE_BINARY_DIR}/${SALAMESH_SRC}/include/sol/sol.hpp
-    ${CMAKE_BINARY_DIR}/${SALAMESH_SRC}/include/sol/config.hpp
-    ${CMAKE_BINARY_DIR}/${SALAMESH_SRC}/include/sol/forward.hpp
+    ${salamesh_SOURCE_DIR}/include/sol/sol.hpp
+    ${salamesh_SOURCE_DIR}/include/sol/config.hpp
+    ${salamesh_SOURCE_DIR}/include/sol/forward.hpp
 )
 
 link_libraries(${CMAKE_DL_LIBS} ultimaille m $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
