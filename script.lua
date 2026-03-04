@@ -125,7 +125,6 @@ function draw_gui()
 	end
 
 	imgui.Begin("Toolbar##tool_bar_diagnostic")
-	model.point.visible = 32
 
 	if app.navigation_path:str() == diagnostic_overlap_view_path then 
 		imgui.BeginDisabled()
@@ -151,18 +150,25 @@ function draw_gui()
 		draw_overlap_tooltip()
 	end
 
+
+	-- imgui.AddCircle(imgui.ImVec2(100, 100), 12., imgui.GetColorU32(imgui.ImVec4(1., 0., 0., 1.)), 0, 5.)
+	-- imgui.AddPolyline({imgui.ImVec2(0,0), imgui.ImVec2(100, 100), imgui.ImVec2(200, 120), imgui.ImVec2(250, 150)}, imgui.GetColorU32(imgui.ImVec4(1., 0., 0., 1.)))
+	imgui.AddPolyline({ImVec2{0,0}, ImVec2{100, 100}, ImVec2{200, 120}, ImVec2{250, 150}}, imgui.GetColorU32(ImVec4{1., 0., 0., 1.}))
+	imgui.AddText(ImVec2{10,30}, imgui.GetColorU32(ImVec4{1., 0., 0., 1.}), "FPS")
+	
+
 end
 
 function compute()
 	-- Compute 3D radiuses of points from point size in pixels
-	local radiuses = get_radiuses(app, app.model)
+	local radiuses = poly_inspector.get_radiuses(app, app.model)
 	
 	-- Display debug lines that shows computed radiuses of points
 	if app.is_debug then  
-		debug_lines(app, app.model, radiuses)
+		poly_inspector.debug_lines(app, app.model, radiuses)
 	end 
 
-	points_overlaps = compute_overlaps(app.model, radiuses)
+	points_overlaps = poly_inspector.compute_overlaps(app.model, radiuses)
 end
 
 local interval = 0.
@@ -204,7 +210,7 @@ end
 -- 	local lr = renderer:as("LineRenderer")
 -- 	lr:clear_lines()
 
--- 	iterate_vertices(app.model, function(p, v)
+-- 	poly_inspector.iterate_vertices(app.model, function(p, v)
 -- 		-- Push lines for debug
 -- 		local gp = vec3{p.x, p.y, p.z}
 
@@ -219,7 +225,7 @@ end
 
 -- 	end)
 
--- 	-- local verts = get_vertices(app.model)
+-- 	-- local verts = poly_inspector.get_vertices(app.model)
 -- 	-- for i=1,#verts do
 -- 	-- 	local p, v = verts[i].pos, verts[i].index
 -- 	-- 	-- Push lines for debug

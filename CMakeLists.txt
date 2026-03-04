@@ -4,11 +4,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 
+# Needed if you want to use "app.is_debug"
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG)
 endif()
-
-set(SALAMESH_URI "https://github.com/lbinria/salamesh.git")
 
 # Include local overrides if the file exists
 if(EXISTS "${CMAKE_SOURCE_DIR}/CMakeLists.local.txt")
@@ -25,6 +24,8 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/CMakeLists.local.txt")
 else()
 
   # Fetch for git
+  set(SALAMESH_URI "https://github.com/lbinria/salamesh.git")
+
   include(FetchContent)
   FetchContent_Declare(
     salamesh
@@ -96,7 +97,6 @@ link_libraries(${CMAKE_DL_LIBS} ultimaille m $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenM
 add_library(diagnostic_module SHARED
   Registerer.h
   interface.cpp
-  script.h
   ${IMGUI_SOURCES}
   ${SOL_SOURCES}
 )
@@ -117,6 +117,7 @@ file(WRITE ${salamesh_build_dir}/settings.json "
 }
 ")
 
+# Copy systematically script.lua file to output build dir when build
 if (MSVC)
   add_custom_target(copy-resources ALL
       COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/script.lua ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/ 
