@@ -149,14 +149,6 @@ function draw_gui()
 	if points_overlaps and app.input_state.vertex.any_hovered then 
 		draw_overlap_tooltip()
 	end
-
-
-	-- imgui.AddCircle(imgui.ImVec2(100, 100), 12., imgui.GetColorU32(imgui.ImVec4(1., 0., 0., 1.)), 0, 5.)
-	-- imgui.AddPolyline({imgui.ImVec2(0,0), imgui.ImVec2(100, 100), imgui.ImVec2(200, 120), imgui.ImVec2(250, 150)}, imgui.GetColorU32(imgui.ImVec4(1., 0., 0., 1.)))
-	imgui.AddPolyline({ImVec2{0,0}, ImVec2{100, 100}, ImVec2{200, 120}, ImVec2{250, 150}}, imgui.GetColorU32(ImVec4{1., 0., 0., 1.}))
-	imgui.AddText(ImVec2{10,30}, imgui.GetColorU32(ImVec4{1., 0., 0., 1.}), "FPS")
-	
-
 end
 
 function compute()
