@@ -2,7 +2,7 @@
 // interface is used by the viewer to initialize the class
 // class will register all custom functions & types needed into lua
 // Note: You should modify register constructor implementation to register your own functions & types
-#include "Registerer.h"
+#include "script.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 

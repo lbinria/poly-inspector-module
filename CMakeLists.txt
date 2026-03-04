@@ -95,7 +95,7 @@ set(SOL_SOURCES
 link_libraries(${CMAKE_DL_LIBS} ultimaille m $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
 
 add_library(diagnostic_module SHARED
-  Registerer.h
+  script.h
   interface.cpp
   ${IMGUI_SOURCES}
   ${SOL_SOURCES}
